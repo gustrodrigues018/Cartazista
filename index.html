@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Estoque - Cartazista</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f6f6f6;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      background: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    input, button, select {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      cursor: pointer;
+      background: #4CAF50;
+      color: white;
+      border: none;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+    th {
+      background: #333;
+      color: white;
+    }
+    .actions button {
+      margin: 0 3px;
+    }
+    .entrada {
+      background: #2196f3;
+    }
+    .saida {
+      background: #f44336;
+    }
+    .entrada:hover { background: #1976d2; }
+    .saida:hover { background: #d32f2f; }
+  </style>
+</head>
+<body>
+  <h1>Controle de Estoque - Cartazista</h1>
+
+  <form id="form">
+    <input type="text" id="nome" placeholder="Nome do artigo" required>
+    <input type="text" id="categoria" placeholder="Categoria" required>
+    <input type="number" id="quantidade" placeholder="Quantidade" min="1" required>
+    <input type="text" id="tipo" placeholder="Tipo de papel (opcional)">
+    <button type="submit">Adicionar</button>
+  </form>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Categoria</th>
+        <th>Quantidade</th>
+        <th>Tipo de Papel</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabela"></tbody>
+  </table>
+
+  <script>
+    const form = document.getElementById('form');
+    const tabela = document.getElementById('tabela');
+
+    let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
+
+    function salvar() {
+      localStorage.setItem('estoque', JSON.stringify(estoque));
+    }
+
+    function atualizarTabela() {
+      tabela.innerHTML = '';
+      estoque.forEach((item, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.nome}</td>
+          <td>${item.categoria}</td>
+          <td>${item.quantidade}</td>
+          <td>${item.tipo || '-'}</td>
+          <td class="actions">
+            <button class="entrada" onclick="entrada(${i})">Entrada</button>
+            <button class="saida" onclick="saida(${i})">Saída</button>
+            <button onclick="excluir(${i})">Excluir</button>
+          </td>
+        `;
+        tabela.appendChild(tr);
+      });
+    }
+
+    form.addEventListener('submit', e => {
+      e.preventDefault();
+      const nome = form.nome.value.trim();
+      const categoria = form.categoria.value.trim();
+      const quantidade = parseInt(form.quantidade.value);
+      const tipo = form.tipo.value.trim();
+
+      if (!nome || !categoria || quantidade <= 0) return alert('Preencha os campos obrigatórios.');
+
+      estoque.push({ nome, categoria, quantidade, tipo });
+      salvar();
+      atualizarTabela();
+      form.reset();
+    });
+
+    function entrada(i) {
+      const qtd = parseInt(prompt('Quantas unidades deseja adicionar?'));
+      if (!isNaN(qtd) && qtd > 0) {
+        estoque[i].quantidade += qtd;
+        salvar();
+        atualizarTabela();
+      }
+    }
+
+    function saida(i) {
+      const qtd = parseInt(prompt('Quantas unidades foram retiradas?'));
+      if (!isNaN(qtd) && qtd > 0) {
+        if (estoque[i].quantidade >= qtd) {
+          estoque[i].quantidade -= qtd;
+          salvar();
+          atualizarTabela();
+        } else {
+          alert('Quantidade insuficiente no estoque.');
+        }
+      }
+    }
+
+    function excluir(i) {
+      if (confirm('Tem certeza que deseja excluir este item?')) {
+        estoque.splice(i, 1);
+        salvar();
+        atualizarTabela();
+      }
+    }
+
+    atualizarTabela();
+  </script>
+</body>
+</html>
