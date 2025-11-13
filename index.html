@@ -15,7 +15,7 @@
     h1 {
       text-align: center;
       color: #222;
-      margin-bottom: 30px;
+      margin-bottom: 10px;
     }
 
     h2 {
@@ -25,6 +25,24 @@
       font-size: 22px;
       border-left: 5px solid #4CAF50;
       padding-left: 10px;
+    }
+
+    /* 🔍 Estilo da barra de pesquisa */
+    #pesquisa {
+      display: block;
+      width: 50%;
+      margin: 0 auto 30px auto;
+      padding: 12px;
+      font-size: 16px;
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      transition: 0.3s;
+      outline: none;
+    }
+
+    #pesquisa:focus {
+      border-color: #4CAF50;
+      box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
     }
 
     form {
@@ -75,7 +93,7 @@
       overflow: hidden;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       text-align: center;
-      table-layout: fixed; /* força colunas iguais */
+      table-layout: fixed;
     }
 
     th, td {
@@ -111,6 +129,9 @@
     .saida:hover { background: #d32f2f; }
 
     @media (max-width: 900px) {
+      #pesquisa {
+        width: 90%;
+      }
       form {
         flex-direction: column;
         align-items: stretch;
@@ -126,6 +147,9 @@
 </head>
 <body>
   <h1>Controle de Estoque - Cartazista</h1>
+
+  <!-- 🔍 Barra de pesquisa -->
+  <input type="text" id="pesquisa" placeholder="Pesquisar por nome ou categoria...">
 
   <form id="form">
     <input type="text" id="nome" placeholder="Nome do artigo" required>
@@ -165,6 +189,7 @@
 
   <script>
     const form = document.getElementById('form');
+    const pesquisa = document.getElementById('pesquisa');
     const tabelaPapeis = document.getElementById('tabela-papeis');
     const tabelaConsumiveis = document.getElementById('tabela-consumiveis');
 
@@ -174,30 +199,35 @@
       localStorage.setItem('estoque', JSON.stringify(estoque));
     }
 
-    function atualizarTabelas() {
+    function atualizarTabelas(filtro = '') {
       tabelaPapeis.innerHTML = '';
       tabelaConsumiveis.innerHTML = '';
 
-      estoque.forEach((item, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${item.nome}</td>
-          <td>${item.categoria}</td>
-          <td>${item.quantidade}</td>
-          <td>${item.tipo || '-'}</td>
-          <td class="actions">
-            <button class="entrada" onclick="entrada(${i})">Entrada</button>
-            <button class="saida" onclick="saida(${i})">Saída</button>
-            <button onclick="excluir(${i})">Excluir</button>
-          </td>
-        `;
+      estoque
+        .filter(item => 
+          item.nome.toLowerCase().includes(filtro.toLowerCase()) ||
+          item.categoria.toLowerCase().includes(filtro.toLowerCase())
+        )
+        .forEach((item, i) => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${item.nome}</td>
+            <td>${item.categoria}</td>
+            <td>${item.quantidade}</td>
+            <td>${item.tipo || '-'}</td>
+            <td class="actions">
+              <button class="entrada" onclick="entrada(${i})">Entrada</button>
+              <button class="saida" onclick="saida(${i})">Saída</button>
+              <button onclick="excluir(${i})">Excluir</button>
+            </td>
+          `;
 
-        if (item.categoria.toLowerCase() === 'papel') {
-          tabelaPapeis.appendChild(tr);
-        } else {
-          tabelaConsumiveis.appendChild(tr);
-        }
-      });
+          if (item.categoria.toLowerCase() === 'papel') {
+            tabelaPapeis.appendChild(tr);
+          } else {
+            tabelaConsumiveis.appendChild(tr);
+          }
+        });
     }
 
     form.addEventListener('submit', e => {
@@ -212,7 +242,7 @@
 
       estoque.push({ nome, categoria, quantidade, tipo });
       salvar();
-      atualizarTabelas();
+      atualizarTabelas(pesquisa.value);
       form.reset();
     });
 
@@ -221,7 +251,7 @@
       if (!isNaN(qtd) && qtd > 0) {
         estoque[i].quantidade += qtd;
         salvar();
-        atualizarTabelas();
+        atualizarTabelas(pesquisa.value);
       }
     }
 
@@ -231,7 +261,7 @@
         if (estoque[i].quantidade >= qtd) {
           estoque[i].quantidade -= qtd;
           salvar();
-          atualizarTabelas();
+          atualizarTabelas(pesquisa.value);
         } else {
           alert('Quantidade insuficiente no estoque.');
         }
@@ -242,9 +272,14 @@
       if (confirm('Tem certeza que deseja excluir este item?')) {
         estoque.splice(i, 1);
         salvar();
-        atualizarTabelas();
+        atualizarTabelas(pesquisa.value);
       }
     }
+
+    // 🔍 Filtro em tempo real
+    pesquisa.addEventListener('input', e => {
+      atualizarTabelas(e.target.value);
+    });
 
     atualizarTabelas();
   </script>
