@@ -7,40 +7,50 @@
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f6f6f6;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background: #f4f4f4;
+      padding: 30px;
+      margin: 0;
     }
 
     h1 {
       text-align: center;
-      color: #333;
-      margin-bottom: 25px;
+      color: #222;
+      margin-bottom: 30px;
     }
 
     h2 {
       color: #333;
-      text-align: center;
-      margin: 30px 0 10px 0;
+      text-align: left;
+      margin: 40px 0 10px 0;
+      font-size: 22px;
+      border-left: 5px solid #4CAF50;
+      padding-left: 10px;
     }
 
     form {
-      background: white;
-      padding: 15px 25px;
+      background: #fff;
+      padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      margin-bottom: 25px;
-      text-align: center;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 30px;
+      max-width: 95%;
+      margin-left: auto;
+      margin-right: auto;
     }
 
     input, button {
-      padding: 10px;
-      margin: 5px;
-      border-radius: 5px;
+      padding: 10px 12px;
+      border-radius: 6px;
       border: 1px solid #ccc;
-      font-size: 14px;
+      font-size: 15px;
+    }
+
+    input {
+      flex: 1 1 200px;
     }
 
     button {
@@ -49,6 +59,8 @@
       color: white;
       border: none;
       transition: 0.2s;
+      flex: 1 1 120px;
+      max-width: 150px;
     }
 
     button:hover {
@@ -56,8 +68,7 @@
     }
 
     table {
-      width: 90%;
-      max-width: 900px;
+      width: 100%;
       border-collapse: collapse;
       background: white;
       border-radius: 10px;
@@ -68,8 +79,9 @@
 
     th, td {
       border-bottom: 1px solid #ddd;
-      padding: 12px;
+      padding: 14px;
       text-align: center;
+      font-size: 15px;
     }
 
     th {
@@ -81,6 +93,8 @@
 
     .actions button {
       margin: 0 3px;
+      padding: 6px 10px;
+      font-size: 14px;
     }
 
     .entrada {
@@ -94,14 +108,16 @@
     .entrada:hover { background: #1976d2; }
     .saida:hover { background: #d32f2f; }
 
-    @media (max-width: 768px) {
-      table {
-        width: 100%;
-        font-size: 12px;
+    @media (max-width: 900px) {
+      form {
+        flex-direction: column;
+        align-items: stretch;
       }
-      input, button {
-        width: 100%;
-        margin: 5px 0;
+      table {
+        font-size: 13px;
+      }
+      th, td {
+        padding: 10px;
       }
     }
   </style>
