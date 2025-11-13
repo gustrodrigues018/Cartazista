@@ -1,140 +1,99 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Estoque - Cartazista</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
-      padding: 30px;
-      margin: 0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Estoque - Cartazista</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f3f3;
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+  }
 
-    h1 {
-      text-align: center;
-      color: #222;
-      margin-bottom: 30px;
-    }
+  h2 {
+    color: #222;
+    text-align: left;
+    border-left: 5px solid #1e9b6c;
+    padding-left: 10px;
+    margin-top: 40px;
+  }
 
-    h2 {
-      color: #333;
-      text-align: left;
-      margin: 40px 0 10px 0;
-      font-size: 22px;
-      border-left: 5px solid #4CAF50;
-      padding-left: 10px;
-    }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px auto;
+    background: white;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
 
-    form {
-      background: #fff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 10px;
-      margin-bottom: 30px;
-      max-width: 95%;
-      margin-left: auto;
-      margin-right: auto;
-    }
+  th, td {
+    border: 1px solid #ddd;
+    padding: 12px 10px;
+    text-align: center;
+  }
 
-    input, button {
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-    }
+  th {
+    background-color: #2f2f2f;
+    color: white;
+    font-weight: bold;
+  }
 
-    input {
-      flex: 1 1 200px;
-    }
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
 
-    button {
-      cursor: pointer;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      transition: 0.2s;
-      flex: 1 1 120px;
-      max-width: 150px;
-    }
+  button {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    margin: 2px;
+  }
 
-    button:hover {
-      background: #45a049;
-    }
+  .entrada { background-color: #007bff; }
+  .saida { background-color: #dc3545; }
+  .excluir { background-color: #28a745; }
+  .entrada:hover { background-color: #0056b3; }
+  .saida:hover { background-color: #b02a37; }
+  .excluir:hover { background-color: #1c7a33; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      text-align: center;
-    }
+  .container {
+    width: 95%;
+    margin: 0 auto;
+  }
 
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 14px;
-      text-align: center;
-      font-size: 15px;
-    }
+  input, select {
+    padding: 8px;
+    margin: 5px;
+  }
 
-    th {
-      background: #333;
-      color: white;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    .actions button {
-      margin: 0 3px;
-      padding: 6px 10px;
-      font-size: 14px;
-    }
-
-    .entrada {
-      background: #2196f3;
-    }
-
-    .saida {
-      background: #f44336;
-    }
-
-    .entrada:hover { background: #1976d2; }
-    .saida:hover { background: #d32f2f; }
-
-    @media (max-width: 900px) {
-      form {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      table {
-        font-size: 13px;
-      }
-      th, td {
-        padding: 10px;
-      }
-    }
-  </style>
+  .formulario {
+    margin: 20px auto;
+    text-align: center;
+  }
+</style>
 </head>
 <body>
-  <h1>Controle de Estoque - Cartazista</h1>
 
-  <form id="form">
-    <input type="text" id="nome" placeholder="Nome do artigo" required>
-    <input type="text" id="categoria" placeholder="Categoria (Papel ou outro)" required>
-    <input type="number" id="quantidade" placeholder="Quantidade" min="1" required>
-    <input type="text" id="tipo" placeholder="Tipo (opcional)">
-    <button type="submit">Adicionar</button>
-  </form>
+<div class="container">
+  <h2>Adicionar Item</h2>
+  <div class="formulario">
+    <input type="text" id="nome" placeholder="Nome">
+    <select id="categoria">
+      <option value="Papel">Papel</option>
+      <option value="Consumíveis">Consumíveis</option>
+    </select>
+    <input type="number" id="quantidade" placeholder="Quantidade">
+    <input type="text" id="tipo" placeholder="Tipo (ex: branco, com orelha...)">
+    <button class="entrada" onclick="adicionarItem()">Adicionar</button>
+  </div>
 
   <h2>Papéis</h2>
-  <table>
+  <table id="tabelaPapeis">
     <thead>
       <tr>
         <th>Nome</th>
@@ -144,11 +103,11 @@
         <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="tabela-papeis"></tbody>
+    <tbody></tbody>
   </table>
 
   <h2>Consumíveis</h2>
-  <table>
+  <table id="tabelaConsumiveis">
     <thead>
       <tr>
         <th>Nome</th>
@@ -158,93 +117,75 @@
         <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="tabela-consumiveis"></tbody>
+    <tbody></tbody>
   </table>
+</div>
 
-  <script>
-    const form = document.getElementById('form');
-    const tabelaPapeis = document.getElementById('tabela-papeis');
-    const tabelaConsumiveis = document.getElementById('tabela-consumiveis');
+<script>
+let estoque = JSON.parse(localStorage.getItem('estoqueCartazista')) || [];
 
-    let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
+function salvar() {
+  localStorage.setItem('estoqueCartazista', JSON.stringify(estoque));
+}
 
-    function salvar() {
-      localStorage.setItem('estoque', JSON.stringify(estoque));
-    }
+function renderizar() {
+  const tabelaPapeis = document.querySelector("#tabelaPapeis tbody");
+  const tabelaConsumiveis = document.querySelector("#tabelaConsumiveis tbody");
+  tabelaPapeis.innerHTML = "";
+  tabelaConsumiveis.innerHTML = "";
 
-    function atualizarTabelas() {
-      tabelaPapeis.innerHTML = '';
-      tabelaConsumiveis.innerHTML = '';
+  estoque.forEach((item, i) => {
+    let linha = document.createElement("tr");
+    let colunas = `
+      <td>${item.nome}</td>
+      <td>${item.categoria}</td>
+      <td>${item.quantidade}</td>
+      <td>${item.tipo || "-"}</td>
+      <td>
+        <button class="entrada" onclick="alterar(${i}, 1)">Entrada</button>
+        <button class="saida" onclick="alterar(${i}, -1)">Saída</button>
+        <button class="excluir" onclick="excluir(${i})">Excluir</button>
+      </td>
+    `;
+    linha.innerHTML = colunas;
+    if (item.categoria === "Papel") tabelaPapeis.appendChild(linha);
+    else tabelaConsumiveis.appendChild(linha);
+  });
+}
 
-      estoque.forEach((item, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${item.nome}</td>
-          <td>${item.categoria}</td>
-          <td>${item.quantidade}</td>
-          <td>${item.tipo || '-'}</td>
-          <td class="actions">
-            <button class="entrada" onclick="entrada(${i})">Entrada</button>
-            <button class="saida" onclick="saida(${i})">Saída</button>
-            <button onclick="excluir(${i})">Excluir</button>
-          </td>
-        `;
+function adicionarItem() {
+  const nome = document.getElementById("nome").value.trim();
+  const categoria = document.getElementById("categoria").value;
+  const quantidade = parseInt(document.getElementById("quantidade").value) || 0;
+  const tipo = document.getElementById("tipo").value.trim();
 
-        if (item.categoria.toLowerCase() === 'papel') {
-          tabelaPapeis.appendChild(tr);
-        } else {
-          tabelaConsumiveis.appendChild(tr);
-        }
-      });
-    }
+  if (!nome) return alert("Preencha o nome do item!");
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const nome = form.nome.value.trim();
-      const categoria = form.categoria.value.trim();
-      const quantidade = parseInt(form.quantidade.value);
-      const tipo = form.tipo.value.trim();
+  estoque.push({ nome, categoria, quantidade, tipo });
+  salvar();
+  renderizar();
 
-      if (!nome || !categoria || quantidade <= 0)
-        return alert('Preencha os campos obrigatórios.');
+  document.getElementById("nome").value = "";
+  document.getElementById("quantidade").value = "";
+  document.getElementById("tipo").value = "";
+}
 
-      estoque.push({ nome, categoria, quantidade, tipo });
-      salvar();
-      atualizarTabelas();
-      form.reset();
-    });
+function alterar(i, valor) {
+  estoque[i].quantidade += valor;
+  if (estoque[i].quantidade < 0) estoque[i].quantidade = 0;
+  salvar();
+  renderizar();
+}
 
-    function entrada(i) {
-      const qtd = parseInt(prompt('Quantas unidades deseja adicionar?'));
-      if (!isNaN(qtd) && qtd > 0) {
-        estoque[i].quantidade += qtd;
-        salvar();
-        atualizarTabelas();
-      }
-    }
+function excluir(i) {
+  if (confirm("Deseja excluir este item?")) {
+    estoque.splice(i, 1);
+    salvar();
+    renderizar();
+  }
+}
 
-    function saida(i) {
-      const qtd = parseInt(prompt('Quantas unidades foram retiradas?'));
-      if (!isNaN(qtd) && qtd > 0) {
-        if (estoque[i].quantidade >= qtd) {
-          estoque[i].quantidade -= qtd;
-          salvar();
-          atualizarTabelas();
-        } else {
-          alert('Quantidade insuficiente no estoque.');
-        }
-      }
-    }
-
-    function excluir(i) {
-      if (confirm('Tem certeza que deseja excluir este item?')) {
-        estoque.splice(i, 1);
-        salvar();
-        atualizarTabelas();
-      }
-    }
-
-    atualizarTabelas();
-  </script>
+renderizar();
+</script>
 </body>
 </html>
