@@ -9,67 +9,101 @@
       font-family: Arial, sans-serif;
       background: #f6f6f6;
       padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+
     h1 {
       text-align: center;
       color: #333;
+      margin-bottom: 25px;
     }
+
     h2 {
       color: #333;
-      margin-top: 40px;
-      border-left: 5px solid #4CAF50;
-      padding-left: 10px;
+      text-align: center;
+      margin: 30px 0 10px 0;
     }
+
     form {
       background: white;
-      padding: 15px;
+      padding: 15px 25px;
       border-radius: 10px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
+      margin-bottom: 25px;
+      text-align: center;
     }
-    input, button, select {
+
+    input, button {
       padding: 10px;
       margin: 5px;
       border-radius: 5px;
       border: 1px solid #ccc;
+      font-size: 14px;
     }
+
     button {
       cursor: pointer;
       background: #4CAF50;
       color: white;
       border: none;
+      transition: 0.2s;
     }
+
     button:hover {
       background: #45a049;
     }
+
     table {
-      width: 100%;
+      width: 90%;
+      max-width: 900px;
       border-collapse: collapse;
       background: white;
       border-radius: 10px;
       overflow: hidden;
-      margin-bottom: 30px;
-    }
-    th, td {
-      border-bottom: 1px solid #ddd;
-      padding: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
       text-align: center;
     }
+
+    th, td {
+      border-bottom: 1px solid #ddd;
+      padding: 12px;
+      text-align: center;
+    }
+
     th {
       background: #333;
       color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
+
     .actions button {
       margin: 0 3px;
     }
+
     .entrada {
       background: #2196f3;
     }
+
     .saida {
       background: #f44336;
     }
+
     .entrada:hover { background: #1976d2; }
     .saida:hover { background: #d32f2f; }
+
+    @media (max-width: 768px) {
+      table {
+        width: 100%;
+        font-size: 12px;
+      }
+      input, button {
+        width: 100%;
+        margin: 5px 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -104,7 +138,7 @@
         <th>Nome</th>
         <th>Categoria</th>
         <th>Quantidade</th>
-        <th>Tipo</th>
+        <th>Tipo de Papel</th>
         <th>Ações</th>
       </tr>
     </thead>
