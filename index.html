@@ -27,10 +27,10 @@
       padding-left: 10px;
     }
 
-    /* 🔍 Estilo da barra de pesquisa */
+    /* 🔍 Barra de pesquisa */
     #pesquisa {
       display: block;
-      width: 50%;
+      width: 60%;
       margin: 0 auto 30px auto;
       padding: 12px;
       font-size: 16px;
@@ -149,7 +149,7 @@
   <h1>Controle de Estoque - Cartazista</h1>
 
   <!-- 🔍 Barra de pesquisa -->
- 
+  <input type="text" id="pesquisa" placeholder="Pesquisar em todo o texto... (ex: papel branco, etiqueta adesivo...)">
 
   <form id="form">
     <input type="text" id="nome" placeholder="Nome do artigo" required>
@@ -159,8 +159,6 @@
     <button type="submit">Adicionar</button>
   </form>
 
- <input type="text" id="pesquisa" placeholder="Pesquisar por nome ou categoria...">
-  
   <h2>Papéis</h2>
   <table>
     <thead>
@@ -201,15 +199,27 @@
       localStorage.setItem('estoque', JSON.stringify(estoque));
     }
 
+    // 🔤 Função que normaliza texto (remove acentos e deixa minúsculo)
+    function normalizar(texto) {
+      return texto
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
+    }
+
     function atualizarTabelas(filtro = '') {
       tabelaPapeis.innerHTML = '';
       tabelaConsumiveis.innerHTML = '';
 
+      const filtroNormalizado = normalizar(filtro);
+
       estoque
-        .filter(item => 
-          item.nome.toLowerCase().includes(filtro.toLowerCase()) ||
-          item.categoria.toLowerCase().includes(filtro.toLowerCase())
-        )
+        .filter(item => {
+          const textoCompleto = normalizar(
+            `${item.nome} ${item.categoria} ${item.quantidade} ${item.tipo || ''}`
+          );
+          return textoCompleto.includes(filtroNormalizado);
+        })
         .forEach((item, i) => {
           const tr = document.createElement('tr');
           tr.innerHTML = `
@@ -278,7 +288,7 @@
       }
     }
 
-    // 🔍 Filtro em tempo real
+    // 🔍 Filtro dinâmico total
     pesquisa.addEventListener('input', e => {
       atualizarTabelas(e.target.value);
     });
