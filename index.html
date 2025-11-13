@@ -172,7 +172,7 @@
     <tbody id="tabela-consumiveis"></tbody>
   </table>
 
-  <script>
+<script>
   const form = document.getElementById('form');
   const pesquisa = document.getElementById('pesquisa');
   const tabelaPapeis = document.getElementById('tabela-papeis');
@@ -186,29 +186,37 @@
     localStorage.setItem('estoque', JSON.stringify(estoque));
   }
 
-  // 🔤 Normaliza e remove acento e espaço
-  function normalizar(texto) {
+  // 🔤 Normaliza: minuscula, remove acentos e espaços extras
+  function normalizar(texto = '') {
     return texto
+      .toString()
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f\s]/g, '');
+      .replace(/[\u0300-\u036f]/g, '') // remove acentos
+      .replace(/\s+/g, ' ')            // compacta espaços
+      .trim();
+  }
+
+  // Retorna versão sem espaços (útil para comparação direta)
+  function normalizarSemEspaco(texto = '') {
+    return normalizar(texto).replace(/\s/g, '');
   }
 
   function atualizarTabelas(filtro = '') {
     tabelaPapeis.innerHTML = '';
     tabelaConsumiveis.innerHTML = '';
 
-    const filtroNormalizado = normalizar(filtro);
+    const filtroNormalizado = normalizarSemEspaco(filtro);
 
     estoque
-      .filter(item => {
-        const textoCompleto = normalizar(
-          `${item.nome}${item.categoria}${item.quantidade}${item.tipo || ''}`
+      .map((item, index) => ({ item, index })) // manter índice real
+      .filter(({ item }) => {
+        const textoCompleto = normalizarSemEspaco(
+          `${item.nome} ${item.categoria} ${item.quantidade} ${item.tipo || ''}`
         );
         return textoCompleto.includes(filtroNormalizado);
       })
-      .forEach((item, i) => {
-        const categoria = item.categoria.toLowerCase();
+      .forEach(({ item, index: i }) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.nome}</td>
@@ -223,12 +231,10 @@
           </td>
         `;
 
-        // ✅ Agora detecta as três categorias de papel
-        if (
-          categoria === 'papel' ||
-          categoria === 'papel sulfite' ||
-          categoria === 'papel cartaz'
-        ) {
+        // --- AQUI A LÓGICA MELHORADA ---
+        // Se a categoria normalizada CONTÉM 'papel' -> Papéis
+        const categoriaNormalizada = normalizar(item.categoria);
+        if (categoriaNormalizada.includes('papel')) {
           tabelaPapeis.appendChild(tr);
         } else {
           tabelaConsumiveis.appendChild(tr);
@@ -238,10 +244,11 @@
 
   form.addEventListener('submit', e => {
     e.preventDefault();
-    const nome = form.nome.value.trim();
-    const categoria = form.categoria.value.trim();
+    // limpa e compacta espaços antes de salvar
+    const nome = form.nome.value.trim().replace(/\s+/g, ' ');
+    const categoria = form.categoria.value.trim().replace(/\s+/g, ' ');
     const quantidade = parseInt(form.quantidade.value);
-    const tipo = form.tipo.value.trim();
+    const tipo = form.tipo.value.trim().replace(/\s+/g, ' ');
 
     if (!nome || !categoria || quantidade <= 0)
       return alert('Preencha os campos obrigatórios.');
@@ -308,7 +315,9 @@
     atualizarTabelas(e.target.value);
   });
 
+  // inicializa
   atualizarTabelas();
 </script>
+
 </body>
 </html>
