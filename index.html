@@ -208,6 +208,7 @@
         return textoCompleto.includes(filtroNormalizado);
       })
       .forEach((item, i) => {
+        const categoria = item.categoria.toLowerCase();
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.nome}</td>
@@ -222,7 +223,12 @@
           </td>
         `;
 
-        if (item.categoria.toLowerCase() === 'papel') {
+        // ✅ Agora detecta as três categorias de papel
+        if (
+          categoria === 'papel' ||
+          categoria === 'papel sulfite' ||
+          categoria === 'papel cartaz'
+        ) {
           tabelaPapeis.appendChild(tr);
         } else {
           tabelaConsumiveis.appendChild(tr);
