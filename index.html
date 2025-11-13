@@ -173,111 +173,136 @@
   </table>
 
   <script>
-    const form = document.getElementById('form');
-    const pesquisa = document.getElementById('pesquisa');
-    const tabelaPapeis = document.getElementById('tabela-papeis');
-    const tabelaConsumiveis = document.getElementById('tabela-consumiveis');
+  const form = document.getElementById('form');
+  const pesquisa = document.getElementById('pesquisa');
+  const tabelaPapeis = document.getElementById('tabela-papeis');
+  const tabelaConsumiveis = document.getElementById('tabela-consumiveis');
+  const botao = form.querySelector('button');
 
-    let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
+  let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
+  let indiceEdicao = null; // controla se estamos editando algo
 
-    function salvar() {
-      localStorage.setItem('estoque', JSON.stringify(estoque));
-    }
+  function salvar() {
+    localStorage.setItem('estoque', JSON.stringify(estoque));
+  }
 
-    // 🔤 Normaliza e remove acento e espaço
-    function normalizar(texto) {
-      return texto
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f\s]/g, ''); // remove acentos e espaços
-    }
+  // 🔤 Normaliza e remove acento e espaço
+  function normalizar(texto) {
+    return texto
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f\s]/g, '');
+  }
 
-    function atualizarTabelas(filtro = '') {
-      tabelaPapeis.innerHTML = '';
-      tabelaConsumiveis.innerHTML = '';
+  function atualizarTabelas(filtro = '') {
+    tabelaPapeis.innerHTML = '';
+    tabelaConsumiveis.innerHTML = '';
 
-      const filtroNormalizado = normalizar(filtro);
+    const filtroNormalizado = normalizar(filtro);
 
-      estoque
-        .filter(item => {
-          const textoCompleto = normalizar(
-            `${item.nome}${item.categoria}${item.quantidade}${item.tipo || ''}`
-          );
-          return textoCompleto.includes(filtroNormalizado);
-        })
-        .forEach((item, i) => {
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${item.nome}</td>
-            <td>${item.categoria}</td>
-            <td>${item.quantidade}</td>
-            <td>${item.tipo || '-'}</td>
-            <td class="actions">
-              <button class="entrada" onclick="entrada(${i})">Entrada</button>
-              <button class="saida" onclick="saida(${i})">Saída</button>
-              <button onclick="excluir(${i})">Excluir</button>
-            </td>
-          `;
+    estoque
+      .filter(item => {
+        const textoCompleto = normalizar(
+          `${item.nome}${item.categoria}${item.quantidade}${item.tipo || ''}`
+        );
+        return textoCompleto.includes(filtroNormalizado);
+      })
+      .forEach((item, i) => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${item.nome}</td>
+          <td>${item.categoria}</td>
+          <td>${item.quantidade}</td>
+          <td>${item.tipo || '-'}</td>
+          <td class="actions">
+            <button class="entrada" onclick="entrada(${i})">Entrada</button>
+            <button class="saida" onclick="saida(${i})">Saída</button>
+            <button onclick="editar(${i})">✏️ Editar</button>
+            <button onclick="excluir(${i})">Excluir</button>
+          </td>
+        `;
 
-          if (item.categoria.toLowerCase() === 'papel') {
-            tabelaPapeis.appendChild(tr);
-          } else {
-            tabelaConsumiveis.appendChild(tr);
-          }
-        });
-    }
+        if (item.categoria.toLowerCase() === 'papel') {
+          tabelaPapeis.appendChild(tr);
+        } else {
+          tabelaConsumiveis.appendChild(tr);
+        }
+      });
+  }
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      const nome = form.nome.value.trim();
-      const categoria = form.categoria.value.trim();
-      const quantidade = parseInt(form.quantidade.value);
-      const tipo = form.tipo.value.trim();
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    const nome = form.nome.value.trim();
+    const categoria = form.categoria.value.trim();
+    const quantidade = parseInt(form.quantidade.value);
+    const tipo = form.tipo.value.trim();
 
-      if (!nome || !categoria || quantidade <= 0)
-        return alert('Preencha os campos obrigatórios.');
+    if (!nome || !categoria || quantidade <= 0)
+      return alert('Preencha os campos obrigatórios.');
 
+    if (indiceEdicao !== null) {
+      // 🔧 modo edição
+      estoque[indiceEdicao] = { nome, categoria, quantidade, tipo };
+      indiceEdicao = null;
+      botao.textContent = 'Adicionar';
+    } else {
+      // ➕ modo adicionar
       estoque.push({ nome, categoria, quantidade, tipo });
+    }
+
+    salvar();
+    atualizarTabelas(pesquisa.value);
+    form.reset();
+  });
+
+  function entrada(i) {
+    const qtd = parseInt(prompt('Quantas unidades deseja adicionar?'));
+    if (!isNaN(qtd) && qtd > 0) {
+      estoque[i].quantidade += qtd;
       salvar();
       atualizarTabelas(pesquisa.value);
-      form.reset();
-    });
+    }
+  }
 
-    function entrada(i) {
-      const qtd = parseInt(prompt('Quantas unidades deseja adicionar?'));
-      if (!isNaN(qtd) && qtd > 0) {
-        estoque[i].quantidade += qtd;
+  function saida(i) {
+    const qtd = parseInt(prompt('Quantas unidades foram retiradas?'));
+    if (!isNaN(qtd) && qtd > 0) {
+      if (estoque[i].quantidade >= qtd) {
+        estoque[i].quantidade -= qtd;
         salvar();
         atualizarTabelas(pesquisa.value);
+      } else {
+        alert('Quantidade insuficiente no estoque.');
       }
     }
+  }
 
-    function saida(i) {
-      const qtd = parseInt(prompt('Quantas unidades foram retiradas?'));
-      if (!isNaN(qtd) && qtd > 0) {
-        if (estoque[i].quantidade >= qtd) {
-          estoque[i].quantidade -= qtd;
-          salvar();
-          atualizarTabelas(pesquisa.value);
-        } else {
-          alert('Quantidade insuficiente no estoque.');
-        }
-      }
+  function excluir(i) {
+    if (confirm('Tem certeza que deseja excluir este item?')) {
+      estoque.splice(i, 1);
+      salvar();
+      atualizarTabelas(pesquisa.value);
     }
+  }
 
-    function excluir(i) {
-      if (confirm('Tem certeza que deseja excluir este item?')) {
-        estoque.splice(i, 1);
-        salvar();
-        atualizarTabelas(pesquisa.value);
-      }
-    }
+  // ✏️ Função editar
+  function editar(i) {
+    const item = estoque[i];
+    form.nome.value = item.nome;
+    form.categoria.value = item.categoria;
+    form.quantidade.value = item.quantidade;
+    form.tipo.value = item.tipo || '';
 
-    pesquisa.addEventListener('input', e => {
-      atualizarTabelas(e.target.value);
-    });
+    indiceEdicao = i;
+    botao.textContent = 'Salvar Edição';
+    form.scrollIntoView({ behavior: 'smooth' });
+  }
 
-    atualizarTabelas();
-  </script>
+  pesquisa.addEventListener('input', e => {
+    atualizarTabelas(e.target.value);
+  });
+
+  atualizarTabelas();
+</script>
 </body>
 </html>
