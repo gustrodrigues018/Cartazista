@@ -117,31 +117,16 @@
       font-size: 14px;
     }
 
-    .entrada {
-      background: #2196f3;
-    }
-
-    .saida {
-      background: #f44336;
-    }
-
+    .entrada { background: #2196f3; }
+    .saida { background: #f44336; }
     .entrada:hover { background: #1976d2; }
     .saida:hover { background: #d32f2f; }
 
     @media (max-width: 900px) {
-      #pesquisa {
-        width: 90%;
-      }
-      form {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      table {
-        font-size: 13px;
-      }
-      th, td {
-        padding: 10px;
-      }
+      #pesquisa { width: 90%; }
+      form { flex-direction: column; align-items: stretch; }
+      table { font-size: 13px; }
+      th, td { padding: 10px; }
     }
   </style>
 </head>
@@ -149,7 +134,7 @@
   <h1>Controle de Estoque - Cartazista</h1>
 
   <!-- 🔍 Barra de pesquisa -->
-  <input type="text" id="pesquisa" placeholder="Pesquisar em todo o texto... (ex: papel branco, etiqueta adesivo...)">
+  <input type="text" id="pesquisa" placeholder="Pesquisar em todo o texto... (ex: papelbranco, etiqueta adesivo, portaetiqueta...)">
 
   <form id="form">
     <input type="text" id="nome" placeholder="Nome do artigo" required>
@@ -199,12 +184,12 @@
       localStorage.setItem('estoque', JSON.stringify(estoque));
     }
 
-    // 🔤 Função que normaliza texto (remove acentos e deixa minúsculo)
+    // 🔤 Normaliza e remove acento e espaço
     function normalizar(texto) {
       return texto
         .toLowerCase()
         .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '');
+        .replace(/[\u0300-\u036f\s]/g, ''); // remove acentos e espaços
     }
 
     function atualizarTabelas(filtro = '') {
@@ -216,7 +201,7 @@
       estoque
         .filter(item => {
           const textoCompleto = normalizar(
-            `${item.nome} ${item.categoria} ${item.quantidade} ${item.tipo || ''}`
+            `${item.nome}${item.categoria}${item.quantidade}${item.tipo || ''}`
           );
           return textoCompleto.includes(filtroNormalizado);
         })
@@ -288,7 +273,6 @@
       }
     }
 
-    // 🔍 Filtro dinâmico total
     pesquisa.addEventListener('input', e => {
       atualizarTabelas(e.target.value);
     });
