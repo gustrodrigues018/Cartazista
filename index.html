@@ -14,6 +14,12 @@
       text-align: center;
       color: #333;
     }
+    h2 {
+      color: #333;
+      margin-top: 40px;
+      border-left: 5px solid #4CAF50;
+      padding-left: 10px;
+    }
     form {
       background: white;
       padding: 15px;
@@ -42,6 +48,7 @@
       background: white;
       border-radius: 10px;
       overflow: hidden;
+      margin-bottom: 30px;
     }
     th, td {
       border-bottom: 1px solid #ddd;
@@ -70,12 +77,13 @@
 
   <form id="form">
     <input type="text" id="nome" placeholder="Nome do artigo" required>
-    <input type="text" id="categoria" placeholder="Categoria" required>
+    <input type="text" id="categoria" placeholder="Categoria (Papel ou outro)" required>
     <input type="number" id="quantidade" placeholder="Quantidade" min="1" required>
     <input type="text" id="tipo" placeholder="Tipo de papel (opcional)">
     <button type="submit">Adicionar</button>
   </form>
 
+  <h2>Papéis</h2>
   <table>
     <thead>
       <tr>
@@ -86,12 +94,27 @@
         <th>Ações</th>
       </tr>
     </thead>
-    <tbody id="tabela"></tbody>
+    <tbody id="tabela-papeis"></tbody>
+  </table>
+
+  <h2>Consumíveis</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Nome</th>
+        <th>Categoria</th>
+        <th>Quantidade</th>
+        <th>Tipo</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody id="tabela-consumiveis"></tbody>
   </table>
 
   <script>
     const form = document.getElementById('form');
-    const tabela = document.getElementById('tabela');
+    const tabelaPapeis = document.getElementById('tabela-papeis');
+    const tabelaConsumiveis = document.getElementById('tabela-consumiveis');
 
     let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
 
@@ -99,8 +122,10 @@
       localStorage.setItem('estoque', JSON.stringify(estoque));
     }
 
-    function atualizarTabela() {
-      tabela.innerHTML = '';
+    function atualizarTabelas() {
+      tabelaPapeis.innerHTML = '';
+      tabelaConsumiveis.innerHTML = '';
+
       estoque.forEach((item, i) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
@@ -114,7 +139,12 @@
             <button onclick="excluir(${i})">Excluir</button>
           </td>
         `;
-        tabela.appendChild(tr);
+
+        if (item.categoria.toLowerCase() === 'papel') {
+          tabelaPapeis.appendChild(tr);
+        } else {
+          tabelaConsumiveis.appendChild(tr);
+        }
       });
     }
 
@@ -125,11 +155,12 @@
       const quantidade = parseInt(form.quantidade.value);
       const tipo = form.tipo.value.trim();
 
-      if (!nome || !categoria || quantidade <= 0) return alert('Preencha os campos obrigatórios.');
+      if (!nome || !categoria || quantidade <= 0)
+        return alert('Preencha os campos obrigatórios.');
 
       estoque.push({ nome, categoria, quantidade, tipo });
       salvar();
-      atualizarTabela();
+      atualizarTabelas();
       form.reset();
     });
 
@@ -138,7 +169,7 @@
       if (!isNaN(qtd) && qtd > 0) {
         estoque[i].quantidade += qtd;
         salvar();
-        atualizarTabela();
+        atualizarTabelas();
       }
     }
 
@@ -148,7 +179,7 @@
         if (estoque[i].quantidade >= qtd) {
           estoque[i].quantidade -= qtd;
           salvar();
-          atualizarTabela();
+          atualizarTabelas();
         } else {
           alert('Quantidade insuficiente no estoque.');
         }
@@ -159,11 +190,11 @@
       if (confirm('Tem certeza que deseja excluir este item?')) {
         estoque.splice(i, 1);
         salvar();
-        atualizarTabela();
+        atualizarTabelas();
       }
     }
 
-    atualizarTabela();
+    atualizarTabelas();
   </script>
 </body>
 </html>
