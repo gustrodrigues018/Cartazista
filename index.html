@@ -172,32 +172,97 @@
     <tbody id="tabela-consumiveis"></tbody>
   </table>
 
-<script>
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    addDoc,
+    updateDoc,
+    deleteDoc,
+    doc
+  } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD8iI8BNm9hj9xma1W9N5r_hHSqrCfeoZo",
+    authDomain: "cartazista-af2dd.firebaseapp.com",
+    projectId: "cartazista-af2dd",
+    storageBucket: "cartazista-af2dd.firebasestorage.app",
+    messagingSenderId: "100291315254",
+    appId: "1:100291315254:web:8f4af8e7aa3b6159f53a97"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const refEstoque = collection(db, "estoque-cartazista");
+
+  /* -------------------------------------- */
+  /*   🔥 FUNÇÃO PARA CARREGAR ITENS        */
+  /* -------------------------------------- */
+  async function carregarEstoque() {
+    const snap = await getDocs(refEstoque);
+    estoque = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    atualizarTabelas(pesquisa.value);
+  }
+
+  /* -------------------------------------- */
+  /* 🔥 ADICIONAR ITEM NO FIRESTORE        */
+  /* -------------------------------------- */
+  async function adicionarItem(item) {
+    await addDoc(refEstoque, item);
+    await carregarEstoque();
+  }
+
+  /* -------------------------------------- */
+  /* 🔥 EDITAR ITEM                         */
+  /* -------------------------------------- */
+  async function editarItem(id, novosDados) {
+    const ref = doc(db, "estoque-cartazista", id);
+    await updateDoc(ref, novosDados);
+    await carregarEstoque();
+  }
+
+  /* -------------------------------------- */
+  /* 🔥 EXCLUIR ITEM                        */
+  /* -------------------------------------- */
+  async function excluirItem(id) {
+    const ref = doc(db, "estoque-cartazista", id);
+    await deleteDoc(ref);
+    await carregarEstoque();
+  }
+
+  /* -------------------------------------- */
+  /* 🔥 ENTRADA & SAÍDA NO FIRESTORE        */
+  /* -------------------------------------- */
+  async function movimentar(id, novaQtd) {
+    const ref = doc(db, "estoque-cartazista", id);
+    await updateDoc(ref, { quantidade: novaQtd });
+    await carregarEstoque();
+  }
+
+  /* -------------------------------------- */
+  /* 🔥 SEU SCRIPT ORIGINAL (ADAPTADO)      */
+  /* -------------------------------------- */
+
   const form = document.getElementById('form');
   const pesquisa = document.getElementById('pesquisa');
   const tabelaPapeis = document.getElementById('tabela-papeis');
   const tabelaConsumiveis = document.getElementById('tabela-consumiveis');
   const botao = form.querySelector('button');
 
-  let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
-  let indiceEdicao = null; // controla se estamos editando algo
+  let estoque = [];
+  let indiceEdicao = null;
 
-  function salvar() {
-    localStorage.setItem('estoque', JSON.stringify(estoque));
-  }
-
-  // 🔤 Normaliza: minuscula, remove acentos e espaços extras
   function normalizar(texto = '') {
     return texto
-      .toString()
       .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // remove acentos
-      .replace(/\s+/g, ' ')            // compacta espaços
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/\s+/g, " ")
       .trim();
   }
 
-  // Retorna versão sem espaços (útil para comparação direta)
   function normalizarSemEspaco(texto = '') {
     return normalizar(texto).replace(/\s/g, '');
   }
@@ -209,14 +274,14 @@
     const filtroNormalizado = normalizarSemEspaco(filtro);
 
     estoque
-      .map((item, index) => ({ item, index })) // manter índice real
+      .map((item, index) => ({ item, index }))
       .filter(({ item }) => {
-        const textoCompleto = normalizarSemEspaco(
-          `${item.nome} ${item.categoria} ${item.quantidade} ${item.tipo || ''}`
+        const texto = normalizarSemEspaco(
+          ${item.nome} ${item.categoria} ${item.quantidade} ${item.tipo ?? ''}
         );
-        return textoCompleto.includes(filtroNormalizado);
+        return texto.includes(filtroNormalizado);
       })
-      .forEach(({ item, index: i }) => {
+      .forEach(({ item, index }) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.nome}</td>
@@ -224,17 +289,14 @@
           <td>${item.quantidade}</td>
           <td>${item.tipo || '-'}</td>
           <td class="actions">
-            <button class="entrada" onclick="entrada(${i})">Entrada</button>
-            <button class="saida" onclick="saida(${i})">Saída</button>
-            <button onclick="editar(${i})">✏️ Editar</button>
-            <button onclick="excluir(${i})">Excluir</button>
+            <button onclick="entrada('${item.id}')">Entrada</button>
+            <button onclick="saida('${item.id}', ${item.quantidade})">Saída</button>
+            <button onclick="editarLinha(${index})">✏️ Editar</button>
+            <button onclick="excluir('${item.id}')">Excluir</button>
           </td>
         `;
 
-        // --- AQUI A LÓGICA MELHORADA ---
-        // Se a categoria normalizada CONTÉM 'papel' -> Papéis
-        const categoriaNormalizada = normalizar(item.categoria);
-        if (categoriaNormalizada.includes('papel')) {
+        if (normalizar(item.categoria).includes('papel')) {
           tabelaPapeis.appendChild(tr);
         } else {
           tabelaConsumiveis.appendChild(tr);
@@ -242,81 +304,63 @@
       });
   }
 
-  form.addEventListener('submit', e => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
-    // limpa e compacta espaços antes de salvar
-    const nome = form.nome.value.trim().replace(/\s+/g, ' ');
-    const categoria = form.categoria.value.trim().replace(/\s+/g, ' ');
-    const quantidade = parseInt(form.quantidade.value);
-    const tipo = form.tipo.value.trim().replace(/\s+/g, ' ');
 
-    if (!nome || !categoria || quantidade <= 0)
-      return alert('Preencha os campos obrigatórios.');
+    const nome = form.nome.value.trim();
+    const categoria = form.categoria.value.trim();
+    const quantidade = parseInt(form.quantidade.value);
+    const tipo = form.tipo.value.trim();
 
     if (indiceEdicao !== null) {
-      // 🔧 modo edição
-      estoque[indiceEdicao] = { nome, categoria, quantidade, tipo };
+      const item = estoque[indiceEdicao];
+      await editarItem(item.id, { nome, categoria, quantidade, tipo });
       indiceEdicao = null;
-      botao.textContent = 'Adicionar';
+      botao.textContent = "Adicionar";
     } else {
-      // ➕ modo adicionar
-      estoque.push({ nome, categoria, quantidade, tipo });
+      await adicionarItem({ nome, categoria, quantidade, tipo });
     }
 
-    salvar();
-    atualizarTabelas(pesquisa.value);
     form.reset();
   });
 
-  function entrada(i) {
-    const qtd = parseInt(prompt('Quantas unidades deseja adicionar?'));
+  window.entrada = async function (id) {
+    const item = estoque.find(i => i.id === id);
+    const qtd = parseInt(prompt("Quantas unidades adicionar?"));
     if (!isNaN(qtd) && qtd > 0) {
-      estoque[i].quantidade += qtd;
-      salvar();
-      atualizarTabelas(pesquisa.value);
+      await movimentar(id, item.quantidade + qtd);
     }
-  }
+  };
 
-  function saida(i) {
-    const qtd = parseInt(prompt('Quantas unidades foram retiradas?'));
-    if (!isNaN(qtd) && qtd > 0) {
-      if (estoque[i].quantidade >= qtd) {
-        estoque[i].quantidade -= qtd;
-        salvar();
-        atualizarTabelas(pesquisa.value);
-      } else {
-        alert('Quantidade insuficiente no estoque.');
-      }
+  window.saida = async function (id, atual) {
+    const qtd = parseInt(prompt("Quantas unidades retirar?"));
+    if (!isNaN(qtd) && qtd > 0 && atual >= qtd) {
+      await movimentar(id, atual - qtd);
+    } else {
+      alert("Quantidade inválida!");
     }
-  }
+  };
 
-  function excluir(i) {
-    if (confirm('Tem certeza que deseja excluir este item?')) {
-      estoque.splice(i, 1);
-      salvar();
-      atualizarTabelas(pesquisa.value);
+  window.excluir = async function (id) {
+    if (confirm("Excluir item?")) {
+      await excluirItem(id);
     }
-  }
+  };
 
-  // ✏️ Função editar
-  function editar(i) {
-    const item = estoque[i];
+  window.editarLinha = function (index) {
+    const item = estoque[index];
     form.nome.value = item.nome;
     form.categoria.value = item.categoria;
     form.quantidade.value = item.quantidade;
     form.tipo.value = item.tipo || '';
 
-    indiceEdicao = i;
-    botao.textContent = 'Salvar Edição';
-    form.scrollIntoView({ behavior: 'smooth' });
-  }
+    indiceEdicao = index;
+    botao.textContent = "Salvar Edição";
+  };
 
-  pesquisa.addEventListener('input', e => {
-    atualizarTabelas(e.target.value);
-  });
+  pesquisa.addEventListener('input', e => atualizarTabelas(e.target.value));
 
-  // inicializa
-  atualizarTabelas();
+  carregarEstoque();
 </script>
 
 </body>
