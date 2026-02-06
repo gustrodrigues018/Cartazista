@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Controle de Estoque - Cartazista</title>
+
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,311 +13,263 @@
       margin: 0;
     }
 
-    h1 {
-      text-align: center;
-      color: #222;
-      margin-bottom: 10px;
-    }
-
+    h1 { text-align: center; }
     h2 {
-      color: #333;
-      text-align: left;
-      margin: 40px 0 10px 0;
-      font-size: 22px;
+      margin: 40px 0 10px;
       border-left: 5px solid #4CAF50;
       padding-left: 10px;
     }
 
-    /* 🔍 Barra de pesquisa */
-    #pesquisa {
-      display: block;
-      width: 60%;
-      margin: 0 auto 30px auto;
-      padding: 12px;
-      font-size: 16px;
-      border: 2px solid #ccc;
-      border-radius: 8px;
-      transition: 0.3s;
-      outline: none;
-    }
-
-    #pesquisa:focus {
-      border-color: #4CAF50;
-      box-shadow: 0 0 8px rgba(76, 175, 80, 0.3);
-    }
-
-    form {
+    form, .massa-box {
       background: #fff;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
       display: flex;
       flex-wrap: wrap;
-      justify-content: center;
       gap: 10px;
-      margin-bottom: 30px;
-      max-width: 95%;
-      margin-left: auto;
-      margin-right: auto;
     }
 
-    input, button {
-      padding: 10px 12px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
+    input, textarea, button {
+      padding: 10px;
       font-size: 15px;
     }
 
-    input {
-      flex: 1 1 200px;
+    textarea {
+      width: 100%;
+      resize: vertical;
     }
 
     button {
-      cursor: pointer;
       background: #4CAF50;
-      color: white;
+      color: #fff;
       border: none;
-      transition: 0.2s;
-      flex: 1 1 120px;
-      max-width: 150px;
+      cursor: pointer;
     }
 
-    button:hover {
-      background: #45a049;
+    #pesquisa {
+      width: 60%;
+      display: block;
+      margin: 20px auto;
+      padding: 10px;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      background: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      text-align: center;
-      table-layout: fixed;
+      background: #fff;
     }
 
     th, td {
+      padding: 12px;
       border-bottom: 1px solid #ddd;
-      padding: 14px;
       text-align: center;
-      font-size: 15px;
-      word-wrap: break-word;
     }
 
-    th {
-      background: #333;
-      color: white;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
+    th { background: #333; color: #fff; }
 
-    .actions button {
-      margin: 0 3px;
-      padding: 6px 10px;
-      font-size: 14px;
-    }
-
-    .entrada { background: #2196f3; }
-    .saida { background: #f44336; }
-    .entrada:hover { background: #1976d2; }
-    .saida:hover { background: #d32f2f; }
-
-    @media (max-width: 900px) {
-      #pesquisa { width: 90%; }
-      form { flex-direction: column; align-items: stretch; }
-      table { font-size: 13px; }
-      th, td { padding: 10px; }
-    }
+    .entrada { background: #2196f3; color: #fff; }
+    .saida { background: #f44336; color: #fff; }
   </style>
 </head>
+
 <body>
-  <h1>Controle de Estoque - Cartazista</h1>
 
-  <form id="form">
-    <input type="text" id="nome" placeholder="Nome do artigo" required>
-    <input type="text" id="categoria" placeholder="Categoria (Papel ou outro)" required>
-    <input type="number" id="quantidade" placeholder="Quantidade" min="1" required>
-    <input type="text" id="tipo" placeholder="Tipo (ex: branco, com orelha...)" >
-    <button type="submit">Adicionar</button>
-  </form>
+<h1>Controle de Estoque - Cartazista</h1>
 
-   <!-- 🔍 Barra de pesquisa -->
-  <input type="text" id="pesquisa" placeholder="Pesquisar em todo o texto... (ex: papelbranco, etiqueta adesivo, portaetiqueta...)">
+<form id="form">
+  <input id="nome" placeholder="Nome do artigo" required>
+  <input id="categoria" placeholder="Categoria (Papel ou Consumível)" required>
+  <input id="quantidade" type="number" min="1" placeholder="Quantidade" required>
+  <input id="tipo" placeholder="Tipo">
+  <button type="submit">Adicionar</button>
+</form>
 
-  <h2>Papéis</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Categoria</th>
-        <th>Quantidade</th>
-        <th>Tipo</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabela-papeis"></tbody>
-  </table>
+<!-- 🔥 ADIÇÃO EM MASSA -->
+<div class="massa-box">
+  <textarea id="massa" rows="5"
+    placeholder="Adição em massa (1 por linha)
+Formato:
+Nome ; Categoria ; Quantidade ; Tipo(opcional)"></textarea>
 
-  <h2>Consumíveis</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Categoria</th>
-        <th>Quantidade</th>
-        <th>Tipo</th>
-        <th>Ações</th>
-      </tr>
-    </thead>
-    <tbody id="tabela-consumiveis"></tbody>
-  </table>
+  <button id="btn-massa" type="button">Adicionar em Massa</button>
+</div>
 
-<script>
+<input id="pesquisa" placeholder="Pesquisar...">
+
+<h2>Papéis</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th><th>Categoria</th><th>Qtd</th><th>Tipo</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody id="tabela-papeis"></tbody>
+</table>
+
+<h2>Consumíveis</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Nome</th><th>Categoria</th><th>Qtd</th><th>Tipo</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody id="tabela-consumiveis"></tbody>
+</table>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-app.js";
+  import {
+    getDatabase, ref, push, set, onValue, update, remove
+  } from "https://www.gstatic.com/firebasejs/12.9.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD8iI8BNm9hj9xma1W9N5r_hHSqrCfeoZo",
+    authDomain: "cartazista-af2dd.firebaseapp.com",
+    databaseURL: "https://cartazista-af2dd-default-rtdb.firebaseio.com",
+    projectId: "cartazista-af2dd",
+    storageBucket: "cartazista-af2dd.appspot.com",
+    messagingSenderId: "100291315254",
+    appId: "1:100291315254:web:8f4af8e7aa3b6159f53a97"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+
   const form = document.getElementById('form');
   const pesquisa = document.getElementById('pesquisa');
   const tabelaPapeis = document.getElementById('tabela-papeis');
   const tabelaConsumiveis = document.getElementById('tabela-consumiveis');
+  const campoMassa = document.getElementById('massa');
+  const btnMassa = document.getElementById('btn-massa');
   const botao = form.querySelector('button');
 
-  let estoque = JSON.parse(localStorage.getItem('estoque')) || [];
-  let indiceEdicao = null; // controla se estamos editando algo
+  let estoque = [];
+  let indiceEdicao = null;
 
-  function salvar() {
-    localStorage.setItem('estoque', JSON.stringify(estoque));
-  }
+  const normalizar = t =>
+    t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
 
-  // 🔤 Normaliza: minuscula, remove acentos e espaços extras
-  function normalizar(texto = '') {
-    return texto
-      .toString()
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // remove acentos
-      .replace(/\s+/g, ' ')            // compacta espaços
-      .trim();
-  }
-
-  // Retorna versão sem espaços (útil para comparação direta)
-  function normalizarSemEspaco(texto = '') {
-    return normalizar(texto).replace(/\s/g, '');
-  }
-
-  function atualizarTabelas(filtro = '') {
+  function atualizarTabelas(filtro='') {
     tabelaPapeis.innerHTML = '';
     tabelaConsumiveis.innerHTML = '';
 
-    const filtroNormalizado = normalizarSemEspaco(filtro);
-
     estoque
-      .map((item, index) => ({ item, index })) // manter índice real
-      .filter(({ item }) => {
-        const textoCompleto = normalizarSemEspaco(
-          `${item.nome} ${item.categoria} ${item.quantidade} ${item.tipo || ''}`
-        );
-        return textoCompleto.includes(filtroNormalizado);
-      })
-      .forEach(({ item, index: i }) => {
+      .filter(i => normalizar(
+        `${i.nome}${i.categoria}${i.tipo}`
+      ).includes(normalizar(filtro)))
+      .forEach((item, i) => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${item.nome}</td>
           <td>${item.categoria}</td>
           <td>${item.quantidade}</td>
           <td>${item.tipo || '-'}</td>
-          <td class="actions">
-            <button class="entrada" onclick="entrada(${i})">Entrada</button>
-            <button class="saida" onclick="saida(${i})">Saída</button>
-            <button onclick="editar(${i})">✏️ Editar</button>
-            <button onclick="excluir(${i})">Excluir</button>
+          <td>
+            <button class="entrada" onclick="entrada(${i})">+</button>
+            <button class="saida" onclick="saida(${i})">-</button>
+            <button onclick="editar(${i})">✏️</button>
+            <button onclick="excluir(${i})">🗑️</button>
           </td>
         `;
 
-        // --- AQUI A LÓGICA MELHORADA ---
-        // Se a categoria normalizada CONTÉM 'papel' -> Papéis
-        const categoriaNormalizada = normalizar(item.categoria);
-        if (categoriaNormalizada.includes('papel')) {
-          tabelaPapeis.appendChild(tr);
-        } else {
-          tabelaConsumiveis.appendChild(tr);
-        }
+        normalizar(item.categoria).includes('papel')
+          ? tabelaPapeis.appendChild(tr)
+          : tabelaConsumiveis.appendChild(tr);
       });
   }
 
-  form.addEventListener('submit', e => {
-    e.preventDefault();
-    // limpa e compacta espaços antes de salvar
-    const nome = form.nome.value.trim().replace(/\s+/g, ' ');
-    const categoria = form.categoria.value.trim().replace(/\s+/g, ' ');
-    const quantidade = parseInt(form.quantidade.value);
-    const tipo = form.tipo.value.trim().replace(/\s+/g, ' ');
+  function carregarEstoque() {
+    onValue(ref(db,'estoque'), snap => {
+      estoque = [];
+      const data = snap.val();
+      if (data) {
+        Object.keys(data).forEach(id => {
+          estoque.push({ id, ...data[id] });
+        });
+      }
+      atualizarTabelas(pesquisa.value);
+    });
+  }
 
-    if (!nome || !categoria || quantidade <= 0)
-      return alert('Preencha os campos obrigatórios.');
+  form.onsubmit = e => {
+    e.preventDefault();
+
+    const nome = form.nome.value.trim();
+    let categoria = form.categoria.value.trim();
+    const quantidade = +form.quantidade.value;
+    const tipo = form.tipo.value.trim();
+
+    categoria = normalizar(categoria).includes('papel')
+      ? 'Papel'
+      : 'Consumível';
 
     if (indiceEdicao !== null) {
-      // 🔧 modo edição
-      estoque[indiceEdicao] = { nome, categoria, quantidade, tipo };
+      update(ref(db,'estoque/'+estoque[indiceEdicao].id),
+        { nome, categoria, quantidade, tipo });
       indiceEdicao = null;
       botao.textContent = 'Adicionar';
     } else {
-      // ➕ modo adicionar
-      estoque.push({ nome, categoria, quantidade, tipo });
+      set(push(ref(db,'estoque')),
+        { nome, categoria, quantidade, tipo });
     }
 
-    salvar();
-    atualizarTabelas(pesquisa.value);
     form.reset();
-  });
+  };
 
-  function entrada(i) {
-    const qtd = parseInt(prompt('Quantas unidades deseja adicionar?'));
-    if (!isNaN(qtd) && qtd > 0) {
-      estoque[i].quantidade += qtd;
-      salvar();
-      atualizarTabelas(pesquisa.value);
-    }
-  }
+  btnMassa.onclick = () => {
+    const linhas = campoMassa.value.split('\n');
 
-  function saida(i) {
-    const qtd = parseInt(prompt('Quantas unidades foram retiradas?'));
-    if (!isNaN(qtd) && qtd > 0) {
-      if (estoque[i].quantidade >= qtd) {
-        estoque[i].quantidade -= qtd;
-        salvar();
-        atualizarTabelas(pesquisa.value);
-      } else {
-        alert('Quantidade insuficiente no estoque.');
-      }
-    }
-  }
+    linhas.forEach(linha => {
+      if (!linha.trim()) return;
 
-  function excluir(i) {
-    if (confirm('Tem certeza que deseja excluir este item?')) {
-      estoque.splice(i, 1);
-      salvar();
-      atualizarTabelas(pesquisa.value);
-    }
-  }
+      const [nome, cat, qtd, tipo=''] =
+        linha.split(';').map(p => p.trim());
 
-  // ✏️ Função editar
-  function editar(i) {
-    const item = estoque[i];
-    form.nome.value = item.nome;
-    form.categoria.value = item.categoria;
-    form.quantidade.value = item.quantidade;
-    form.tipo.value = item.tipo || '';
+      if (!nome || !cat) return;
 
+      const categoria = normalizar(cat).includes('papel')
+        ? 'Papel'
+        : 'Consumível';
+
+      set(push(ref(db,'estoque')), {
+        nome,
+        categoria,
+        quantidade: parseInt(qtd) || 1,
+        tipo
+      });
+    });
+
+    campoMassa.value = '';
+  };
+
+  window.entrada = i =>
+    update(ref(db,'estoque/'+estoque[i].id),
+      { quantidade: estoque[i].quantidade + 1 });
+
+  window.saida = i => {
+    if (estoque[i].quantidade > 0)
+      update(ref(db,'estoque/'+estoque[i].id),
+        { quantidade: estoque[i].quantidade - 1 });
+  };
+
+  window.editar = i => {
+    const it = estoque[i];
+    form.nome.value = it.nome;
+    form.categoria.value = it.categoria;
+    form.quantidade.value = it.quantidade;
+    form.tipo.value = it.tipo || '';
     indiceEdicao = i;
-    botao.textContent = 'Salvar Edição';
-    form.scrollIntoView({ behavior: 'smooth' });
-  }
+    botao.textContent = 'Salvar';
+  };
 
-  pesquisa.addEventListener('input', e => {
-    atualizarTabelas(e.target.value);
-  });
+  window.excluir = i =>
+    confirm('Excluir item?') &&
+    remove(ref(db,'estoque/'+estoque[i].id));
 
-  // inicializa
-  atualizarTabelas();
+  pesquisa.oninput = e => atualizarTabelas(e.target.value);
+
+  carregarEstoque();
 </script>
 
 </body>
